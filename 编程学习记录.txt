@@ -23,7 +23,61 @@
 
 # 二、学习记录
 
-## （一）Docker
+## （一）Git
+
+### 1、核心理论
+
+共有四个工作区域：工作目录（working）、暂存区（stage）、资源库（history）、远程仓库（remote）。
+Git的工作流程
+①在工作目录中添加、修改文件（modified）；
+②将需要进行版本管理的文件放入暂存区域（staged）；
+③将暂存区域的文件提交到git仓库（committed）。
+
+### 2、bash命令
+
+①查看配置
+`git config -l`
+`git config --global --list` 用户全局配置（user.name user.email）
+
+②设置用户名和邮箱(必须要配置，要不然不能提交！！！)
+`git config --global user.name yiwenli`
+`git config --global user.email 906431910@qq.com`
+
+③初始化
+`git init`
+
+④克隆远程仓库到本地
+`git clone [url]`
+
+⑤查看文件状态
+`git status [文件名]`   指定文件
+`git status`   所有文件
+
+⑥从工作目录提交到暂存区
+`git add . `   所有文件
+
+⑦从暂存区提交到本地仓库
+`git commit -m “提交信息”`   -m后面为提交日志
+
+⑧从本地仓库提交到远程仓库
+`git push`
+
+⑨分支相关
+`git branch`   列出所有本地分支
+`git branch -r`   列出所有远程分支
+`git branch [branch-name]`   新建一个分支，但仍然停留在当前分支
+`git checkout -b [branch]`   新建一个分支，并切换到该分支
+`git merge [branch]`   合并指定分支到当前分支
+`git branch -d [branch-name]`   删除分支
+`git push origin --delete`   删除远程分支
+`git branch -dr [remote/branch]`   删除远程分支
+
+初次创建
+`git remote add origin git@github.com:ewl116/Learning.git`
+`git branch -M main`
+`git push -u origin main`
+
+## （二）Docker
 
 官网 https://www.docker.com/
 
