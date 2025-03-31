@@ -1,0 +1,111 @@
+# 一、Mac软件安装
+
+访达中按下`Command+Shift+G`打开路径输入提示符
+
+强制打开某软件
+`sudo xattr -rd com.apple.quarantine [从访达中拖过来]`
+
+## （一）IDEA安装
+
+### 1、安装步骤
+
+（1）下载安装包
+（2）破解补丁下载
+（3）安装idea后退出应用
+（4）执行破解脚本
+（5）重启idea
+（6）填入指定激活码完成激活
+
+### 2、破解脚本
+
+`bash /Users/yiwenli/Documents/Workspace/DevScripts/jetbra/scripts/install.sh`
+设置开机自启动
+（1）MAC聚焦搜索-自动操作
+（2）新建应用程序
+（3）选择运行Shell脚本拖拽到右侧
+（4）Shell类型改成/bin/sh后在下方输入脚本，并可以在右上角点击运行测试。如果命令中有用到密码输入，可以使用如下命令: echo "密码" | sudo或任何需要输入密码的命令
+（5）系统设置-通用-登录项-设置启动项
+
+![image-20250318151143188](/Users/yiwenli/Library/Application Support/typora-user-images/image-20250318151143188.png)
+
+## （二）JDK卸载
+
+1、先找到具体路径
+/usr/libexec/java_home -V
+echo $JAVA_HOME
+2、删除运行路径和运行环境等
+sudo rm -fr /Library/Internet\ Plug-Ins/JavaAppletPlugin.plugin
+sudo rm -fr /Library/PreferencesPanes/JavaControlPanel.prefPane
+sudo rm -fr ~/Library/Application\ Support/Java
+3、删除当前版本的jdk
+sudo rm -rf /Library/Java/JavaVirtualMachines/jdk1.8.0_212.jdk
+（注：不确定版本号先查看当前版本 ls /Library/Java/JavaVirtualMachines/）
+4、检查是否卸载成功
+echo $JAVA_HOME
+
+## （三）Redis安装
+
+https://www.newbe.pro/Mirrors/Mirrors-Redis/
+
+`make`
+`make test`
+`sudo make install`
+
+启动redis `redis-server`
+关闭redis `redis-cli shutdown`
+
+## （四）Nginx安装
+
+1、Nginx 需要 PCRE – Perl 兼容正则表达式( http://www.pcre.org/ )
+
+下载并安装 PCRE：
+
+```
+cd pcre-8.01
+./configure --prefix=/usr/local
+make
+sudo make install
+```
+
+2、下载并安装 Openssl。请访问（https://www.openssl.org/source/）
+
+3、在 nginx 文件夹中输入以下命令进行安装：
+
+```
+./configure
+make
+sudo make install
+```
+
+启动:  `sudo ./objs/nginx`
+停止:  `sudo ./objs/nginx -s stop`
+重启:  `sudo ./objs/nginx -s reload`
+验证是否停止:  `ps aux | grep nginx`
+
+## （五）Mysql安装
+
+root用户密码00000000
+
+`ps -ef|grep mysql`
+`/usr/local/mysql-8.0.41-macos15-arm64/bin/mysqldump`
+
+## （六）DBeaver Ultimate激活
+
+1、下载破解补丁解压后得到`dvt-DBeaver-KeyMaker.jar`
+2、终端运行`java -jar dvt-DBeaver-KeyMaker.jar`
+3、填写`name`/`company`/`email`, 使用默认信息也可以
+4、点击`Patch`按钮前往路径`/Applications/DBeaverUltimate.app/Contents/Eclipse/plugins`
+选择：com.dbeaver.model.license.jar和com.dbeaver.app.ultimate.jar
+5、拷贝生成的`License`, 运行`DBeaverUltimate.app`后点击`Import License`粘贴
+6、完成
+
+## （七）cursor
+
+0.44.11 是最后一个可重置试用的版本, 在终端使用以下代码实现
+
+```
+# 以下2个方案任选一个
+curl -fsSL https://raw.githubusercontent.com/isboyjc/cursor-reset/main/scripts/reset.sh | sh
+
+curl -sL dub.sh/cursorreset | python3   
+```

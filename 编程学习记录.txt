@@ -1,0 +1,123 @@
+# 一、环境配置
+
+## （一）终端风格切换
+
+密码980116
+如果每次打开终端都提示：
+
+> The default interactive shell is now zsh.
+> To update your account to use zsh, please run chsh -s /bin/zsh.
+> 原因是原本使用的是bash风格，提示语告知现在新系统的shell已经更换为zsh。
+
+切换成zsh命令： `chsh -s /bin/zsh`
+切换成bash命令：`chsh -s /bin/bash`
+
+## （二）环境变量修改
+
+使用bash
+`vim ~/.bash_profile`
+`source .bash_profile`
+
+使用zsh
+`vim ~/.zshrc`
+
+# 二、学习记录
+
+## （一）Docker
+
+官网 https://www.docker.com/
+
+### 1、基础命令
+
+不知道怎么用就`--help`
+
+#### （1）镜像
+
+检索：`docker search [镜像名:标签(版本)]`   如果不加标签表示下载latest
+下载：`docker pull`
+列表：`docker images`
+删除：`docker rmi`
+
+#### （2）容器（每一个容器都想象成是一个独立的Linux服务器）
+
+运行：`docker run`
+查看：`docker ps`
+停止：`docker stop`
+启动：`docker start`
+重启：`docker restart`
+状态：`docker stats`
+日志：`docker logs`
+进入：`docker exec`
+删除：`docker rm [-f]`   -f 表示强制删除
+
+#### （3）分享
+
+提交：`docker commit`
+保存：`docker save`
+加载：`docker load`
+登录：`docker login`
+命名：`docker tag`
+推送：`docker push`
+
+### 2、复杂命令拆解
+
+#### （1）docker run命令
+
+后台启动：`-d`
+起别名：`--name`
+端口映射：`-p 88:80`   表示外部主机88端口映射内部容器80端口
+容器退出时总是重启：`--restart=always`
+赋予容器权限修改宿主文件权利：`--privileged=true`
+
+#### （2）docker exec命令
+
+进入容器内部系统：`docker exec -it [容器名/容器ID] /bin/bash`   -it表示要进行交互
+退出容器内部系统：`exit`
+
+### 3、常用镜像
+
+#### （1）MySQL
+
+```
+docker run \
+-p 3306:3306 \
+--name mysql_test \
+--restart=always \
+--privileged=true \
+-v /Users/yiwenli/Documents/Workspace/Environment/Docker/mysql/data:/var/lib/mysql \
+-v /Users/yiwenli/Documents/Workspace/Environment/Docker/mysql/conf/my.cnf:/etc/mysql/my.cnf \
+-e MYSQL_ROOT_PASSWORD=000000 \
+-d mysql:8.3.0  
+```
+
+注释：
+-v /home/mysql/log:/var/log/mysql表示容器日志挂载到宿主机
+-v /home/mysql/data:/var/lib/mysql表示容器存储文件挂载到宿主机
+-v /home/mysql/conf/my.cnf:/etc/mysql/my.cnf表示容器配置文件挂载到宿主机
+
+#### （2）Postgres
+
+```
+docker pull postgres:12
+```
+
+```
+docker stop postgres_test
+docker rm postgres_test
+rm -rf /Users/yiwenli/Documents/Workspace/Environment/Docker/postgres/data/*
+```
+
+```
+docker run \
+-p 5432:5432 \
+--name postgres_test \
+--restart=always \
+--privileged=true \
+-e POSTGRES_DB=postgres \
+-e POSTGRES_USER=postgres \
+-e POSTGRES_PASSWORD=000000 \
+-e PGDATA=/var/lib/postgresql/data/pgdata \
+-v /Users/yiwenli/Documents/Workspace/Environment/Docker/postgres/data:/var/lib/postgresql/data/pgdata \
+-d postgres:12  
+```
+
