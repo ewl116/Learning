@@ -1,6 +1,8 @@
-# 一、环境配置
+# 一、学习记录
 
-## （一）终端风格切换
+## （一）Bash
+
+### 1、终端风格切换
 
 密码980116
 如果每次打开终端都提示：
@@ -12,7 +14,7 @@
 切换成zsh命令： `chsh -s /bin/zsh`
 切换成bash命令：`chsh -s /bin/bash`
 
-## （二）环境变量修改
+### 2、环境变量修改
 
 使用bash
 `vim ~/.bash_profile`
@@ -21,9 +23,11 @@
 使用zsh
 `vim ~/.zshrc`
 
-# 二、学习记录
+### 3、修改权限
 
-## （一）Git
+`chmod -R 777 [目录名]`
+
+## （二）Git
 
 ### 1、核心理论
 
@@ -77,7 +81,7 @@ Git的工作流程
 `git branch -M main`
 `git push -u origin main`
 
-## （二）Docker
+## （三）Docker
 
 官网 https://www.docker.com/
 
@@ -103,6 +107,10 @@ Git的工作流程
 日志：`docker logs`
 进入：`docker exec`
 删除：`docker rm [-f]`   -f 表示强制删除
+列出所有卷：`docker volume ls`
+查看卷详情：`docker volume inspect [卷名]`
+删除所有容器：`docker rm -f $(docker ps -aq)`
+查看容器细节：`docker container inspect [容器名]`
 
 #### （3）分享
 
@@ -117,37 +125,41 @@ Git的工作流程
 
 #### （1）docker run命令
 
+命令较长时可以使用`\`进行换行
+
 后台启动：`-d`
 起别名：`--name`
 端口映射：`-p 88:80`   表示外部主机88端口映射内部容器80端口
 容器退出时总是重启：`--restart=always`
 赋予容器权限修改宿主文件权利：`--privileged=true`
+目录挂载：`-v [外部宿主机位置]:[内部容器位置]`
+卷映射：`-v [卷名]:[内部容器位置]`  卷默认位置/var/lib/docker/volumes/<卷名>
+指定自定义网络：`--network`
+传入环境变量参数：`-e [参数名]=[参数值]`
 
 #### （2）docker exec命令
 
-进入容器内部系统：`docker exec -it [容器名/容器ID] /bin/bash`   -it表示要进行交互
+进入容器内部系统：`docker exec -it [容器名/容器ID] /bin/bash`   -it表示要进行交互，/bin/bash可以简写成bash
 退出容器内部系统：`exit`
 
 ### 3、常用镜像
+
+**bitnami**制作了很多优质镜像，可以用其配置。
 
 #### （1）MySQL
 
 ```
 docker run \
+-d \
 -p 3306:3306 \
 --name mysql_test \
 --restart=always \
 --privileged=true \
+-e MYSQL_ROOT_PASSWORD=000000 \
 -v /Users/yiwenli/Documents/Workspace/Environment/Docker/mysql/data:/var/lib/mysql \
 -v /Users/yiwenli/Documents/Workspace/Environment/Docker/mysql/conf/my.cnf:/etc/mysql/my.cnf \
--e MYSQL_ROOT_PASSWORD=000000 \
--d mysql:8.3.0  
+mysql:8.3.0  
 ```
-
-注释：
--v /home/mysql/log:/var/log/mysql表示容器日志挂载到宿主机
--v /home/mysql/data:/var/lib/mysql表示容器存储文件挂载到宿主机
--v /home/mysql/conf/my.cnf:/etc/mysql/my.cnf表示容器配置文件挂载到宿主机
 
 #### （2）Postgres
 
@@ -163,6 +175,7 @@ rm -rf /Users/yiwenli/Documents/Workspace/Environment/Docker/postgres/data/*
 
 ```
 docker run \
+-d \
 -p 5432:5432 \
 --name postgres_test \
 --restart=always \
@@ -172,6 +185,140 @@ docker run \
 -e POSTGRES_PASSWORD=000000 \
 -e PGDATA=/var/lib/postgresql/data/pgdata \
 -v /Users/yiwenli/Documents/Workspace/Environment/Docker/postgres/data:/var/lib/postgresql/data/pgdata \
--d postgres:12  
+postgres:12  
 ```
 
+### 4、网络
+
+docker为每个容器分配唯一ip，使用容器ip+容器端口可以相互访问。但ip由于各种原因可能变化，docker0默认不支持主机域名。
+
+创建自定义网络，容器名就是稳定域名。
+创建网络：`docker network create [网络名]`
+在run时指定网络名，那么在同一自定义网络下的容器间相互访问时，稳定域名就是对应的容器名，不用再用ip访问。
+
+### 5、批量管理容器
+
+首先要有一个yaml文件，里面配置多个应用的启动命令。
+
+上线：`docker compose up -d`
+下线：`docker compose down`
+启动：`docker compose start x1 x2 x3`   x对应要启动的应用
+停止：`docker compose stop x1 x3`
+扩容：`docker compose scale x2=3` x2启动3份
+
+示例：开源博客系统
+（1）方式1
+创建网络：`docker network create blog`
+启动MySQL
+
+```
+docker run \
+-d -p 3306:3306 \
+-e MYSQL_ROOT_PASSWORD=000000 \
+-e MYSQL_DATABASE=wordpress \
+-v /Users/yiwenli/Documents/Workspace/Environment/Docker/mysql/data:/var/lib/mysql \
+-v /Users/yiwenli/Documents/Workspace/Environment/Docker/mysql/conf/my.cnf:/etc/mysql/my.cnf \
+--restart always \
+--name mysql_blog \
+--network blog \
+mysql:8.3.0
+```
+
+启动wordpress
+
+```
+docker run \
+-d -p 8080:80 \
+-e WORDPRESS_DB_HOST=mysql_blog \
+-e WORDPRESS_DB_USER=root \
+-e WORDPRESS_DB_PASSWORD=000000 \
+-e WORDPRESS_DB_NAME=wordpress \
+-v wordpress:/var/www/html \
+--restart always \
+--name wordpress-app \
+--network blog \
+wordpress:latest
+```
+
+（2）方式2
+创建compose.yaml文件：
+
+```
+name: myblog
+
+services: 
+  mysql:
+    container_name: mysql_blog
+    image: mysql:8.3.0
+    ports: 
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=000000
+      - MYSQL_DATABASE=wordpress
+    volumes:
+      - /Users/yiwenli/Documents/Workspace/Environment/Docker/mysql/data:/var/lib/mysql
+      - /Users/yiwenli/Documents/Workspace/Environment/Docker/mysql/conf/my.cnf:/etc/mysql/my.cnf
+    restart: always
+    networks:
+      - blog
+
+  wordpress:
+    container_name: wordpress-app
+    image: wordpress:latest
+    ports: 
+      - "8080:80"
+    environment:
+      - WORDPRESS_DB_HOST=mysql_blog
+      - WORDPRESS_DB_USER=root
+      - WORDPRESS_DB_PASSWORD=000000
+      - WORDPRESS_DB_NAME=wordpress
+    volumes:
+      - wordpress:/var/www/html
+    restart: always
+    networks:
+      - blog
+    depends_on:
+      - mysql
+
+# 声明卷
+volumes:
+  wordpress:
+
+# 声明网络
+networks:
+  blog:
+```
+
+启动命令：`docker compose -f compose.yaml up -d`
+删除容器、镜像、卷：`docker compose -f compose.yaml down --rmi all -v`
+
+### 6、制作镜像
+
+镜像中包含基础环境、软件包、启动命令。
+常见指令有：
+FROM 指定镜像基础环境
+LABEL 自定义标签
+EXPOSE 指定暴露端口
+COPY 复制文件到镜像
+ENTRYPOINT 容器固定启动命令
+
+RUN 运行自定义命令
+CMD 容器启动命令或参数
+ENV 环境变量
+ADD 添加文件到镜像
+VOLUME 数据卷
+USER 指定用户和用户组
+WORKDIR 指定默认工作目录
+ARG 指定构建参数
+
+创建Dockerfile，例：
+
+```
+FROM openjdk:17
+LABEL author=ewl116
+COPY app.jar /app.jar
+EXPOSE 8080
+ENTRYPOINT ["java","-jar","/app.jar"]
+```
+
+执行构建命令 `docker build -f Dockerfile -t myjavaapp:v1.0 .`
